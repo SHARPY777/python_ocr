@@ -22,10 +22,7 @@ import { runInferenceOnImage } from './TfliteUtils';
 
 const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = Dimensions.get('window');
 
-// Model configuration
-const MODEL_INPUT_SIZE = 640;
 const CONFIDENCE_THRESHOLD = 0.5;
-const IOU_THRESHOLD = 0.5;
 
 const ScanLicensePlateScreen = () => {
   const navigation = useNavigation();
@@ -39,7 +36,6 @@ const ScanLicensePlateScreen = () => {
   const [licensePlate, setLicensePlate] = useState('');
   const [stateCode, setStateCode] = useState('');
 
-  // Camera format for better quality
   const format = useCameraFormat(device, [
     { videoResolution: { width: 1920, height: 1080 } },
     { fps: 30 }
@@ -62,7 +58,7 @@ const ScanLicensePlateScreen = () => {
     if (isCapturing || isProcessing || !camera.current) return;
 
     try {
-      setIsCapturing(true); // Start capture process
+      setIsCapturing(true); 
       const photo = await camera.current.takePhoto({
         qualityPrioritization: 'quality',
         flash: 'off',
@@ -71,13 +67,13 @@ const ScanLicensePlateScreen = () => {
 
       console.log(`📸 Photo captured: ${photo.path}`);
       setCapturedImage(photo.path);
-      setIsProcessing(true); // Start processing after capture
+      setIsProcessing(true); 
       await processImage(photo.path);
     } catch (error) {
       console.error('🚨 Capture Error:', error);
       Alert.alert("Capture Failed", "Please try again.");
     } finally {
-      setIsCapturing(false); // Capture complete
+      setIsCapturing(false); 
     }
   };
 
@@ -114,21 +110,18 @@ const ScanLicensePlateScreen = () => {
         throw new Error('No license plates detected');
       }
       
-      // Get the plate with highest confidence
       const bestPlate = plates.reduce((prev, current) => 
         (prev.confidence > current.confidence) ? prev : current
       );
       
       console.log('✅ Detected plate:', bestPlate.text);
       
-      // Step 4: Extract state code (first 2 characters)
       const plateText = bestPlate.text.replace(/\s/g, '');
       const detectedStateCode = plateText.substring(0, 2);
       
       setLicensePlate(plateText);
       setStateCode(detectedStateCode);
       
-      // Step 5: Navigate to results
       navigation.navigate('AddCar', {
         licensePlate: plateText,
         stateCode: detectedStateCode,
@@ -141,11 +134,10 @@ const ScanLicensePlateScreen = () => {
         error.message || 'Could not detect license plate. Try again or enter manually.'
       );
     } finally {
-      setIsProcessing(false); // Always reset processing state
+      setIsProcessing(false); 
     }
   };
 
-  // Process YOLOv9 output (simplified)
   const processOutput = (output) => {
     const plates = [];
     const numDetections = Math.min(output[0], 10);
@@ -187,14 +179,13 @@ const ScanLicensePlateScreen = () => {
         style={StyleSheet.absoluteFill}
         device={device}
         format={format}
-        isActive={isFocused} // Camera stays active as long as screen is focused
+        isActive={isFocused} 
         photo={true}
         onInitialized={() => console.log('📷 Camera initialized')}
         onError={(error) => console.error('Camera Error', error.message)}
         pixelFormat="yuv"
       />
 
-      {/* Overlay with detection area */}
       <View style={styles.overlay}>
         <View style={styles.detectionBox} />
         <Text style={styles.overlayText}>Position license plate here</Text>
